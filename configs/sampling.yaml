@@ -1,0 +1,26 @@
+# ============================================================================
+# Sampling / Generation Parameters — Optimized for Gemma 4 E4B
+# ============================================================================
+#
+# Design rationale for E4B:
+#   - temperature: 0.0 → Fully deterministic. The 4B model benefits from
+#     greedy decoding for code generation; stochastic sampling introduces
+#     syntax errors and tool-argument hallucinations at this model scale.
+#   - top_p: 1.0 → No nucleus sampling (redundant at temp=0, but explicit).
+#   - max_output_tokens: 4096 → Enough for a multi-step tool call or a
+#     medium-sized code patch, without blowing context on a single turn.
+#   - thinking_budget: 1024 → Lightweight chain-of-thought. Keeps latency
+#     low (~1-2s per turn) while still allowing the model to reason about
+#     code structure before acting. Higher budgets (2048+) risk timeouts
+#     at concurrency=1.
+#
+# These values should be re-tuned after measuring real vLLM throughput on
+# the competition's L4x4 hardware.
+
+temperature: 0.0
+top_p: 1.0
+max_output_tokens: 4096
+
+thinking_config:
+  thinking_budget: 1024
+  include_thoughts: false   # Strip thoughts from context to save tokens

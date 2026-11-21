@@ -1,0 +1,39 @@
+# ============================================================================
+# Gemma 4 E4B SWE Agent — Root Configuration
+# Competition: Google - The Gemma 4 Developer Agent Competition (Kaggle)
+# Model: gemma-4-e4b-it (4B parameter edge-optimized variant)
+# ============================================================================
+#
+# This agent uses a single-stage, phase-gated workflow optimized for the
+# constrained token budget and reasoning depth of the E4B model. It avoids
+# multi-agent sequential pipelines (which risk harness continuation-nudge
+# resets) in favor of a monolithic agent with explicit phase instructions.
+#
+# Key design decisions:
+#   1. Low temperature (0.0) for deterministic code generation.
+#   2. Conservative thinking budget (1024 tokens) to stay within time limits.
+#   3. Tight tool-call and turn caps to prevent runaway loops.
+#   4. Graceful degradation: graph tools used when available, grep fallback otherwise.
+
+name: gemma4_e4b_swe_agent
+model: gemma-4-e4b-it
+
+description: >
+  Autonomous SWE agent powered by Gemma 4 E4B. Navigates repositories,
+  localizes bugs, applies minimal patches, and verifies fixes — all within
+  tight time and token budgets suited for a 4B-parameter edge model.
+
+# ---------------------------------------------------------------------------
+# System prompt — loaded from external file for maintainability
+# ---------------------------------------------------------------------------
+instruction: !include prompts/system.md
+
+# ---------------------------------------------------------------------------
+# Generation / sampling configuration
+# ---------------------------------------------------------------------------
+generation_config: !include configs/sampling.yaml
+
+# ---------------------------------------------------------------------------
+# Evaluation constraints — per-task resource caps
+# ---------------------------------------------------------------------------
+eval_config: !include eval_config.yaml

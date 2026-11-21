@@ -1,0 +1,35 @@
+# ============================================================================
+# Evaluation Configuration — Per-Task Resource Caps
+# ============================================================================
+#
+# These limits prevent any single task from consuming the entire 12-hour
+# budget. The values below assume scorer concurrency of 1 (worst case).
+#
+# Budget math (concurrency = 1):
+#   Total budget:        720 min (12 hrs)
+#   Target utilization:  70% → 504 min usable
+#   Tasks:               ~120
+#   Slot per task:       504 / 120 ≈ 4.2 min
+#   Setup overhead:      ~1 min (measured assumption)
+#   Agent time per task: ~3 min
+#
+# We set max_time_minutes slightly above the average slot to allow harder
+# tasks more room, while keeping worst-case total (120 × 5 / 1 = 600 min)
+# well under the 720-minute hard ceiling.
+#
+# If concurrency > 1, these caps become generous rather than tight.
+
+evaluation:
+  # Maximum wall-clock minutes per task (including tool execution)
+  max_time_minutes: 5
+
+  # Hard ceiling on tool calls per task — prevents infinite loops
+  # E4B should solve most tasks in 8-15 calls; 25 is a generous safety margin
+  max_tool_calls: 25
+
+  # Maximum conversational turns (each turn = one model response)
+  max_turns: 30
+
+  # Timeout for individual shell command execution (seconds)
+  # Prevents runaway test suites or builds from blocking the agent
+  timeout_seconds: 120
