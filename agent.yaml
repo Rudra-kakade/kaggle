@@ -1,7 +1,7 @@
 # ============================================================================
 # Gemma 4 E4B SWE Agent — Root Configuration
 # Competition: Google - The Gemma 4 Developer Agent Competition (Kaggle)
-# Model: gemma-4-e4b-it (4B parameter edge-optimized variant)
+# Model: gemma-4-e4b-it-qat-w4a16-ct (4B edge-optimized QAT variant)
 # ============================================================================
 #
 # This agent uses a single-stage, phase-gated workflow optimized for the
@@ -16,7 +16,10 @@
 #   4. Graceful degradation: graph tools used when available, grep fallback otherwise.
 
 name: gemma4_e4b_swe_agent
-model: gemma-4-e4b-it
+
+# CRITICAL: Must be the exact QAT variant string from competition rules.
+# Using "gemma-4-e4b-it" alone will fail — harness requires the full quantized ID.
+model: gemma-4-e4b-it-qat-w4a16-ct
 
 description: >
   Autonomous SWE agent powered by Gemma 4 E4B. Navigates repositories,
@@ -29,11 +32,22 @@ description: >
 instruction: !include prompts/system.md
 
 # ---------------------------------------------------------------------------
-# Generation / sampling configuration
+# Declared tools — the harness needs an explicit tools list
 # ---------------------------------------------------------------------------
-generation_config: !include configs/sampling.yaml
+tools:
+  - run_command
+  - read_file
+  - edit_file
+  - write_file
+  - get_status
+  - submit_patch
+  - get_code_neighbors
+  - search_similar_code
+  - get_code_subgraph
 
 # ---------------------------------------------------------------------------
-# Evaluation constraints — per-task resource caps
+# Generation / sampling configuration
+# CRITICAL: Field must be "generate_content_config" (ADK schema),
+# NOT "generation_config" — the harness rejects the wrong key name.
 # ---------------------------------------------------------------------------
-eval_config: !include eval_config.yaml
+generate_content_config: !include configs/sampling.yaml
